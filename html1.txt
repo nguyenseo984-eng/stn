@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Merry Christmas - Thu Huyền</title>
+    <style>
+        :root { 
+            --gold: #ffd700; --red: #ff4d4d; --dark-green: #042d22;
+            --dark-blue: #010b1a; --brown: #5d3a37;
+        }
+        body { 
+            margin: 0; background: linear-gradient(to bottom, var(--dark-blue) 0%, #001f3f 100%); 
+            color: white; perspective: 1200px; height: 100vh; overflow: hidden; 
+            font-family: 'Segoe UI', sans-serif; touch-action: none;
+        }
+
+        /* Lớp phủ Hộp Quà khởi đầu */
+        #giftOverlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 3000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; transition: 0.8s;
+        }
+        .gift-box-intro {
+            font-size: 100px; cursor: pointer; animation: bounce 1s infinite alternate;
+            filter: drop-shadow(0 0 30px var(--red));
+        }
+        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.15); } }
+        .click-text { margin-top: 20px; font-weight: bold; color: var(--gold); letter-spacing: 2px; text-align: center; padding: 0 20px; }
+
+        /* Scene Container */
+        .scene-container {
+            width: 100%; height: 100%; display: none; justify-content: center; align-items: center;
+            transform-style: preserve-3d; animation: autoRotate 35s infinite linear;
+            /* Tự động thu nhỏ tỉ lệ để thấy hết cây khổng lồ trên mobile */
+            scale: 0.6;
+        }
+        @media (min-width: 768px) { .scene-container { scale: 0.9; } }
+        @keyframes autoRotate { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+
+        .title-3d {
+            position: absolute; top: 2vh; font-size: clamp(30px, 10vw, 70px); 
+            font-weight: bold; color: var(--gold); text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            transform: translateZ(200px); text-align: center; width: 100%; z-index: 100;
+        }
+
+        .christmas-scene { position: relative; transform-style: preserve-3d; top: 50px; }
+
+        /* CÂY THÔNG KHỔNG LỒ */
+        .tree-base { position: relative; transform-style: preserve-3d; }
+        .tree-layer { 
+            position: absolute; width: 0; height: 0; 
+            border-left: var(--size) solid transparent; border-right: var(--size) solid transparent;
+            border-bottom: calc(var(--size) * 1.2) solid var(--dark-green); 
+            left: calc(var(--size) * -1); transform-origin: 50% 100%;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+        }
+        .l1 { --size: 180px; bottom: 0; }
+        .l2 { --size: 160px; bottom: 50px; }
+        .l3 { --size: 140px; bottom: 100px; }
+        .l4 { --size: 120px; bottom: 150px; }
+        .l5 { --size: 100px; bottom: 200px; }
+        .l6 { --size: 80px; bottom: 240px; }
+        .l7 { --size: 60px; bottom: 280px; }
+        .l8 { --size: 40px; bottom: 310px; }
+
+        .tree-trunk { 
+            position: absolute; width: 50px; height: 60px; 
+            background: var(--brown); left: -25px; bottom: -60px; 
+            border-radius: 5px; box-shadow: inset 0 0 20px #000;
+        }
+
+        /* Lời ngỏ CỐ ĐỊNH (Không chuyển động) */
+        #fixedMessage {
+            position: fixed; bottom: 20px; left: 20px; right: 20px;
+            z-index: 2500; background: rgba(255, 255, 255, 0.9);
+            color: #333; padding: 15px; border-radius: 12px;
+            font-size: 14px; line-height: 1.5; display: none;
+            border-left: 6px solid var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Khung Media */
+        .media-frame { 
+            position: absolute; background: white; border: 4px solid #fff;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6); transform-style: preserve-3d; 
+            backface-visibility: hidden; border-radius: 5px; overflow: hidden;
+        }
+        .media-frame img, .media-frame video { width: 100%; height: 80%; object-fit: cover; display: block; }
+        .media-frame p { color: #333; font-size: 10px; margin: 4px 0; text-align: center; font-weight: bold; }
+
+        /* Tọa độ khung ảnh xung quanh cây (Sửa lỗi Z-index) */
+        .p1 { transform: translate3d(220px, -50px, 100px) rotateY(-20deg); width: 120px; height: 160px;}
+        .p2 { transform: translate3d(-220px, -120px, 150px) rotateY(30deg); width: 140px; height: 110px;}
+        .p3 { transform: translate3d(0px, -280px, -250px) rotateY(180deg); width: 120px; height: 160px;}
+        .p4 { transform: translate3d(200px, -350px, -150px) rotateY(45deg); width: 130px; height: 100px;}
+        .p5 { transform: translate3d(-180px, -380px, -100px) rotateY(-45deg); width: 110px; height: 140px;}
+
+        .gift {
+            position: absolute; width: 35px; height: 35px;
+            transform-style: preserve-3d; bottom: -60px;
+        }
+
+        .snow { position: fixed; inset: 0; pointer-events: none; background-image: radial-gradient(circle, #fff 1.2px, transparent 1.2px); background-size: 60px 60px; animation: snow 15s linear infinite; z-index: 5; }
+        @keyframes snow { from { background-position: 0 0; } to { background-position: 600px 1200px; } }
+
+        #musicBtn {
+            position: fixed; top: 20px; right: 20px; z-index: 2000;
+            background: rgba(0,0,0,0.5); border: 2px solid var(--gold);
+            color: white; border-radius: 50%; width: 50px; height: 50px; cursor: pointer;
+            display: none; align-items: center; justify-content: center; font-size: 22px;
+        }
+
+        .led { position: absolute; width: 6px; height: 6px; border-radius: 50%; animation: blink 0.6s infinite alternate; }
+        @keyframes blink { from { opacity: 0.3; } to { opacity: 1; box-shadow: 0 0 15px currentColor; } }
+    </style>
+</head>
+<body>
+
+<div id="giftOverlay" onclick="openGift()">
+    <div class="gift-box-intro">🎁</div>
+    <div class="click-text">CHÚC MỪNG ĐÃ NHẬN ĐƯỢC 500k<br>TỪ "THU Huyền"</div>
+    <div style="color:white; font-size: 13px; margin-top: 15px; opacity: 0.8;">(Chạm vào hộp quà là mất tiền tk ngân hàng)</div>
+</div>
+
+<div id="fixedMessage">
+    <b>Gửi Thu Huyền ! 🎄</b><br>
+    Chúc cậu một Giáng Sinh thật ấm áp, rạng rỡ như ánh sao và ngập tràn hạnh phúc. Mong rằng những điều ngọt ngào nhất sẽ luôn ở bên cậu! ✨
+</div>
+
+<div class="snow"></div>
+<button id="musicBtn">🔇</button>
+
+<audio id="bgMusic" loop>
+    <source src="https://pomf2.lain.la/f/505fxeem.mp3" type="audio/mpeg">
+</audio>
+
+<div class="scene-container" id="scene">
+    <div class="title-3d">Merry Christmas Hì Đuyến</div>
+    
+    <div class="christmas-scene">
+        <div class="tree-base" id="tree">
+            <div class="tree-trunk"></div>
+            <div class="tree-layer l1"></div><div class="tree-layer l2"></div>
+            <div class="tree-layer l3"></div><div class="tree-layer l4"></div>
+            <div class="tree-layer l5"></div><div class="tree-layer l6"></div>
+            <div class="tree-layer l7"></div><div class="tree-layer l8"></div>
+            <div id="star" style="position: absolute; top: -350px; left: -25px; font-size: 50px; filter: drop-shadow(0 0 20px gold);">⭐</div>
+        </div>
+
+        <div id="presentsContainer"></div>
+
+        <div class="media-frame p1"><img src="https://pomf2.lain.la/f/2kw5let.jpg" alt="1"><p>hê hê ✨</p></div>
+      <div class="media-frame p1"><img src="https://pomf2.lain.la/f/2kw5let.jpg" alt="1"><p>Rạng rỡ ✨</p></div>
+        <div class="media-frame p2"><img src="https://scontent-hkg1-2.xx.fbcdn.net/v/t39.30808-6/518340056_1260718059027418_6986611120815478482_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=833d8c&_nc_ohc=bLbPaAlpJaIQ7kNvwGTtu0S&_nc_oc=AdksNi5-9tUAsJEd9FrX0KsEVE6Pnmz1o3FezZzfjPEnZvPqZZXLI_XfXwB3-HVjZnruzlRiX8S_piYPOh1ipstN&_nc_zt=23&_nc_ht=scontent-hkg1-2.xx&_nc_gid=76GgPRUlvbvkYJtZw1xFCQ&oh=00_Afm-EAlbY61hfbh7JCQP1BomS02GM8r3-JIgoE0m6STH-w&oe=6950B256" alt="2"><p>gia đình 🔥</p></div>
+        <div class="media-frame p3"><img src="https://scontent-hkg1-2.xx.fbcdn.net/v/t39.30808-6/517715049_1260718035694087_6879287973097814589_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=833d8c&_nc_ohc=FcF8ojamNEQQ7kNvwEvhRZ3&_nc_oc=AdlRQdDYuSyJUeIiu7HCQC0r3ymwYpy1FOpC9jP_OiMTgYGf2V4tkFayCfZaIVXb80etB85oCC-Fic4ElaD8BU6N&_nc_zt=23&_nc_ht=scontent-hkg1-2.xx&_nc_gid=udfityYT1M7b1dmzGK_rfg&oh=00_AfmYYmp_yu-5om6-VKawYsUDsHbjdrkl7t7nzTZt4sGJFA&oe=6950B8F6" alt="3"><p>lười,không t cho ảnh dìm rồi 😊</p></div>
+        <div class="media-frame p4">
+            <video src="https://pomf2.lain.la/f/t7kkgxrz.mp4" autoplay loop muted playsinline></video>
+            <p>Vibes 🎬</p>
+        </div>
+        <div class="media-frame p5"><img src="https://scontent-hkg1-2.xx.fbcdn.net/v/t39.30808-6/494714322_1207216194377605_7952932999009930_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=sDtH0Dym80kQ7kNvwFuNeD_&_nc_oc=AdlFLwOaDFUT4j4YBk-HBcWTFH2JBXb1kosOCX2MEMMdk0tnz-D7YfThHk3K9ci0GfD8b8U-ta2nRoHR5Vl8ywf8&_nc_zt=23&_nc_ht=scontent-hkg1-2.xx&_nc_gid=9imJRUF1xtc6szQQtM6kaQ&oh=00_Afmhdr81JKUF3mqjxzdPHs6Owt5t1-m24BJpwOhvJzCnfA&oe=69509473" alt="5"><p>xấu vch thật m ạ 🌟</p></div>
+    </div>
+</div>
+
+<script>
+    const music = document.getElementById('bgMusic');
+    const btn = document.getElementById('musicBtn');
+    const scene = document.getElementById('scene');
+    const overlay = document.getElementById('giftOverlay');
+    const fixedMsg = document.getElementById('fixedMessage');
+
+    function openGift() {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            scene.style.display = 'flex';
+            btn.style.display = 'flex';
+            fixedMsg.style.display = 'block';
+            toggleMusic();
+        }, 800);
+    }
+
+    function toggleMusic() {
+        if (music.paused) { music.play(); btn.innerHTML = '🎵'; } 
+        else { music.pause(); btn.innerHTML = '🔇'; }
+    }
+
+    btn.onclick = (e) => { e.stopPropagation(); toggleMusic(); };
+
+    // 1. Tạo hộp quà dưới chân cây
+    const giftContainer = document.getElementById('presentsContainer');
+    for (let i = 0; i < 20; i++) {
+        const gift = document.createElement('div');
+        gift.className = 'gift';
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 80 + Math.random() * 120;
+        gift.style.background = ['#ff4d4d', '#ffd700', '#ffffff', '#3498db'][i % 4];
+        gift.style.transform = `translate3d(${Math.cos(angle)*dist}px, 0, ${Math.sin(angle)*dist}px)`;
+        giftContainer.appendChild(gift);
+    }
+
+    // 2. Tạo đèn LED
+    const tree = document.getElementById('tree');
+    for (let i = 0; i < 70; i++) {
+        const led = document.createElement('div');
+        led.className = 'led';
+        const layer = Math.floor(Math.random() * 8) + 1;
+        const radius = (9 - layer) * 20; 
+        const angle = Math.random() * Math.PI * 2;
+        led.style.color = ['#ff0', '#f0f', '#0ff', '#f00', '#0f0'][i % 5];
+        led.style.backgroundColor = 'currentColor';
+        led.style.bottom = (layer * 40) + 'px';
+        led.style.left = (Math.cos(angle) * radius) + 'px';
+        led.style.transform = `translateZ(${Math.sin(angle) * radius}px)`;
+        tree.appendChild(led);
+    }
+
+    // 3. Xoay tay
+    let isDragging = false; let startX; let rotationY = 0;
+    document.addEventListener('touchstart', (e) => {
+        isDragging = true; startX = e.touches[0].clientX;
+        scene.style.animationPlayState = 'paused';
+    });
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        rotationY += (e.touches[0].clientX - startX) * 0.5;
+        scene.style.transform = `rotateY(${rotationY}deg)`;
+        startX = e.touches[0].clientX;
+    });
+    document.addEventListener('touchend', () => {
+        isDragging = false;
+        setTimeout(() => { if(!isDragging) scene.style.animationPlayState = 'running'; }, 2000);
+    });
+</script>
+</body>
+</html>
